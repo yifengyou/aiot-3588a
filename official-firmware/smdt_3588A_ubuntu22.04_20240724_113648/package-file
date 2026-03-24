@@ -1,0 +1,13 @@
+# NAME	PATH
+package-file	package-file
+parameter	parameter.txt
+bootloader	MiniLoaderAll.bin
+uboot	uboot.img
+misc	misc.img
+boot	boot.img
+recovery	recovery.img
+backup	RESERVED
+oempriv	oempriv.img
+userdata	userdata.img
+oem	oem.img
+rootfs	rootfs.img
