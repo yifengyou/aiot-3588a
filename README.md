@@ -20,7 +20,6 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 ## 开发板信息
 
 
---
 
 ## 目录
 
@@ -45,7 +44,6 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
     * [Ubuntu22](docs/系统/Ubuntu22/Ubuntu22.md)
     * [Ubuntu20](docs/系统/Ubuntu20/Ubuntu20.md)
 
----
 
 
 ## 免责声明
@@ -53,5 +51,5 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 * 与官方无任何关联
 * 仅学习交流，无任何商业用途
 
----
+
 

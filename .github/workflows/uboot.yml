@@ -1,0 +1,95 @@
+name: uboot v2017.09
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
+env:
+  TZ: America/New_York
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+  build-uboot:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        id: basic_info
+        run: |
+          nproc
+          uname -a
+          cat /etc/*release
+          free -h
+          mount
+          df -h
+          cat /proc/cpuinfo
+          cat /proc/meminfo
+
+      - name: Create simulated physical disk
+        run: |
+          mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
+          root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
+          sudo truncate -s "${mnt_size}"G /mnt/mnt.img
+          sudo truncate -s "${root_size}"G /root.img
+          sudo losetup /dev/loop6 /mnt/mnt.img
+          sudo losetup /dev/loop7 /root.img
+          sudo pvcreate /dev/loop6
+          sudo pvcreate /dev/loop7
+          sudo vgcreate github /dev/loop6 /dev/loop7
+          sudo lvcreate -n runner -l 100%FREE github
+          sudo mkfs.xfs /dev/github/runner
+          sudo mkdir -p /builder
+          sudo mount /dev/github/runner /builder
+          sudo chown -R runner.runner /builder
+          df -Th
+
+      - name: Run uboot Build in Ubuntu 18.04 container
+        working-directory: /builder
+        run: |
+          pwd
+          sudo /bin/cp -a ${{ github.workspace }}/* .
+          ls -alh
+          sudo docker run --rm \
+            --privileged \
+            --cap-add SYS_ADMIN \
+            -v /dev:/dev \
+            -v /builder:/workspace \
+            -w /workspace \
+            ubuntu:18.04 \
+            bash -c "
+              chmod +x /workspace/kdevbuild/uboot_v2017.sh ;
+              /workspace/kdevbuild/uboot_v2017.sh
+            "
+
+      - name: List build output
+        run: |
+          ls -alh  /builder/release/*
+          md5sum /builder/release/*
+
+      - name: Upload Kernel to Release
+        uses: ncipollo/release-action@main
+        with:
+          tag: uboot_v2017
+          artifacts: /builder/release/*
+          allowUpdates: true
+          removeArtifacts: false
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: | # uboot_v2017
+
+            ## 发布内容
+            - **uboot.img** - uboot 镜像
+            - **trust.img** - trust 镜像
+
+            ## 重要提示
+            > **此发布为中间构建产物，非完整固件！**
+            >
+            > **非专业开发人员请勿下载使用**
+
+            ## 免责声明
+            - **按原样提供**：镜像不作任何保证，使用风险自负
+            - **无官方关联**：无任何官方关联关系
+            - **安全提示**：请及时更新补丁、修改默认密码、配置防火墙

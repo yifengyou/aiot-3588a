@@ -1,0 +1,461 @@
+name: ophub kernel 6.6.y
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: '构建类型'
+        required: false
+        default: 'kernel'
+        type: choice
+        options:
+          - image
+          - kernel
+
+env:
+  TZ: America/New_York
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+  build-kernel:
+    if: ${{ github.event.inputs.build_type == 'kernel' }}
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        id: basic_info
+        run: |
+          nproc
+          uname -a
+          cat /etc/*release
+          free -h
+          mount
+          df -h
+          cat /proc/cpuinfo
+          cat /proc/meminfo
+
+      - name: Create simulated physical disk
+        run: |
+          mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
+          root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
+          sudo truncate -s "${mnt_size}"G /mnt/mnt.img
+          sudo truncate -s "${root_size}"G /root.img
+          sudo losetup /dev/loop6 /mnt/mnt.img
+          sudo losetup /dev/loop7 /root.img
+          sudo pvcreate /dev/loop6
+          sudo pvcreate /dev/loop7
+          sudo vgcreate github /dev/loop6 /dev/loop7
+          sudo lvcreate -n runner -l 100%FREE github
+          sudo mkfs.xfs /dev/github/runner
+          sudo mkdir -p /builder
+          sudo mount /dev/github/runner /builder
+          sudo chown -R runner.runner /builder
+          df -Th
+
+      - name: Run Kernel Build in Ubuntu 22.04 container
+        working-directory: /builder
+        run: |
+          pwd
+          sudo /bin/cp -a ${{ github.workspace }}/* .
+          ls -alh
+          sudo docker run --rm \
+            --privileged \
+            --cap-add SYS_ADMIN \
+            -v /dev:/dev \
+            -v /builder:/workspace \
+            -w /workspace \
+            ubuntu:22.04 \
+            bash -c "
+              chmod +x /workspace/kdevbuild/ophub_6.6.y_kernel.sh ;
+              /workspace/kdevbuild/ophub_6.6.y_kernel.sh
+            "
+
+      - name: List build output
+        run: |
+          ls -alh  /builder/release/*
+          md5sum /builder/release/*
+
+      - name: Upload Kernel to Release
+        uses: ncipollo/release-action@main
+        with:
+          tag: ophub_6.6.y_kernel
+          artifacts: /builder/release/*
+          allowUpdates: true
+          removeArtifacts: false
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: | # ophub_6.6.y_kernel
+
+            ## 发布内容
+            - **Image** - Linux 内核镜像
+            - **dtb/** - 设备树文件
+            - **kos.tar.gz** - 内核模块压缩包
+            - **uboot.img** - uboot 镜像
+
+            ## 重要提示
+            > **此发布为中间构建产物，非完整固件！**
+            >
+            > **非专业开发人员请勿下载使用**
+
+            ## 免责声明
+            - **按原样提供**：镜像不作任何保证，使用风险自负
+            - **无官方关联**：与猫头鹰微视科技有限公司无官方关系
+            - **安全提示**：请及时更新补丁、修改默认密码、配置防火墙
+
+  build-image:
+    if: ${{ github.event.inputs.build_type == 'image' }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - set_vendor: armbian
+            set_rootfs: armbian_bookworm_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_bookworm_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_bookworm_xfce_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_bullseye_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_forky_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_forky_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_forky_xfce_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_jammy_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_jammy_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_jammy_xfce_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_noble_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_noble_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_noble_xfce_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_plucky_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_plucky_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_plucky_xfce_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_trixie_gnome_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_trixie_mini_aarch64.rar
+          - set_vendor: armbian
+            set_rootfs: armbian_trixie_xfce_aarch64.rar
+          - set_vendor: istoreos
+            set_rootfs: istoreos_24.10.1_arm64.rar
+          - set_vendor: istoreos
+            set_rootfs: istoreos_24.10.2_arm64.rar
+          - set_vendor: istoreos
+            set_rootfs: istoreos_24.10.3_arm64.rar
+          - set_vendor: istoreos
+            set_rootfs: istoreos_24.10.4_arm64.rar
+          - set_vendor: istoreos
+            set_rootfs: istoreos_24.10.5_arm64.rar
+          - set_vendor: openwrt
+            set_rootfs: openwrt_24.10.1_aarch64.rar
+          - set_vendor: openwrt
+            set_rootfs: openwrt_24.10.2_aarch64.rar
+          - set_vendor: openwrt
+            set_rootfs: openwrt_24.10.3_aarch64.rar
+          - set_vendor: openwrt
+            set_rootfs: openwrt_24.10.4_aarch64.rar
+          - set_vendor: openwrt
+            set_rootfs: openwrt_24.10.5_aarch64.rar
+          - set_vendor: ubuntu
+            set_rootfs: ubuntu_bionic_18.04_arm64.rar
+          - set_vendor: ubuntu
+            set_rootfs: ubuntu_focal_20.04_arm64.rar
+          - set_vendor: ubuntu
+            set_rootfs: ubuntu_jammy_22.04_arm64.rar
+          - set_vendor: ubuntu
+            set_rootfs: ubuntu_noble_24.04_arm64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.03-LTS-SP1.aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.03-LTS-SP2-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.03-LTS-SP3-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.03-LTS-SP4-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.03-LTS.aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-20.09.aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-21.03-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-21.09-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-64kb-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-SP1-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-SP2-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-SP3-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.03-LTS-SP4-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-22.09-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-23.03-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-23.09-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-24.03-LTS-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-24.03-LTS-SP1-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-24.03-LTS-SP2-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-24.03-LTS-SP3-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-24.09-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-25.03-aarch64.rar
+          - set_vendor: openeuler
+            set_rootfs: openEuler-25.09-aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-8.8-5.4.119-20.0009.29-20230817.1028-aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-EC2-9.2-20250226.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-8.10-20240729.0-20240730.1138-aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20240529.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20240711.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20240807.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20240919.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20241030.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20241211.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20250226.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20250327.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.2-20250421.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.4-20250820.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.4-20251120.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: OpenCloudOS-GenericCloud-9.4-20251223.0.aarch64.rar
+          - set_vendor: opencloudos
+            set_rootfs: opencloudos-v8.6-minimal-aarch64-20230206.rar
+          - set_vendor: opencloudos
+            set_rootfs: opencloudos-v9.0-20230317-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-23.0-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-23.1-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-23.2-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-23.3-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-23.4-aarch64.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-7.9-GA-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-7.9-GA-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.10-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.10-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.2-GA-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.2-GA-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.4-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.4-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.6-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.6-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.8-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.8-aarch64-RHCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.9-aarch64-ANCK.rar
+          - set_vendor: openanolis
+            set_rootfs: AnolisOS-8.9-aarch64-RHCK.rar
+          - set_vendor: kali
+            set_rootfs: kali-linux-2025.3-cloud-genericcloud-arm64.rar
+          - set_vendor: kali
+            set_rootfs: kali-linux-2025.4-cloud-genericcloud-arm64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-33-1.2.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-34-1.2.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-35-1.2.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-36-1.5.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-37-1.7.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-38-1.6.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-39-1.5.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-Generic-41-1.4.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-Generic.aarch64-40-1.14.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-UEFI-UKI-41-1.4.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Cloud-Base-UEFI-UKI.aarch64-40-1.14.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Server-Guest-Generic-42-1.1.aarch64.rar
+          - set_vendor: fedora
+            set_rootfs: Fedora-Server-Guest-Generic-43-1.6.aarch64.rar
+          - set_vendor: debian
+            set_rootfs: debian_bookworm_12_arm64.rar
+          - set_vendor: debian
+            set_rootfs: debian_bullseye_11_arm64.rar
+          - set_vendor: debian
+            set_rootfs: debian_trixie_13_arm64.rar
+          - set_vendor: rockylinux
+            set_rootfs: rockylinux_10_aarch64.rar
+          - set_vendor: rockylinux
+            set_rootfs: rockylinux_8_aarch64.rar
+          - set_vendor: rockylinux
+            set_rootfs: rockylinux_9_aarch64.rar
+          - set_vendor: fnos
+            set_rootfs: fnos_1.1.19_arm64.rar
+          - set_vendor: centos
+            set_rootfs: centos_10_aarch64.rar
+          - set_vendor: centos
+            set_rootfs: centos_8_aarch64.rar
+          - set_vendor: centos
+            set_rootfs: centos_9_aarch64.rar
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        id: basic_info
+        run: |
+          nproc
+          uname -a
+          cat /etc/*release
+          free -h
+          mount
+          df -h
+          cat /proc/cpuinfo
+          cat /proc/meminfo
+
+      - name: Create simulated physical disk
+        run: |
+          mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
+          root_size=$(expr $(df -h / | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 4)
+          sudo truncate -s "${mnt_size}"G /mnt/mnt.img
+          sudo truncate -s "${root_size}"G /root.img
+          sudo losetup /dev/loop6 /mnt/mnt.img
+          sudo losetup /dev/loop7 /root.img
+          sudo pvcreate /dev/loop6
+          sudo pvcreate /dev/loop7
+          sudo vgcreate github /dev/loop6 /dev/loop7
+          sudo lvcreate -n runner -l 100%FREE github
+          sudo mkfs.xfs /dev/github/runner
+          sudo mkdir -p /builder
+          sudo mount /dev/github/runner /builder
+          sudo chown -R runner.runner /builder
+          df -Th
+
+      - name: Run Image Build in Ubuntu 22.04 container
+        working-directory: /builder
+        run: |
+          pwd
+          sudo /bin/cp -a ${{ github.workspace }}/* .
+          ls -alh
+          sudo docker run --rm \
+            --privileged \
+            --cap-add SYS_ADMIN \
+            -v /dev:/dev \
+            -v /builder:/workspace \
+            -w /workspace \
+            -e set_vendor=${{ matrix.set_vendor }} \
+            -e set_rootfs=${{ matrix.set_rootfs }} \
+            ubuntu:22.04 \
+            bash -c "
+              chmod +x /workspace/kdevbuild/ophub_6.6.y_image.sh ;
+              /workspace/kdevbuild/ophub_6.6.y_image.sh
+            "
+
+      - name: List build output
+        run: |
+          ls -alh  /builder/release/*
+          md5sum /builder/release/*
+
+      - name: Upload Image to Release
+        uses: ncipollo/release-action@main
+        with:
+          tag: ophub_6.6.y_image
+          artifacts: /builder/release/*
+          allowUpdates: true
+          removeArtifacts: false
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: | # ophub_6.6.y_image
+
+            ## 系统密码
+
+            - 用户名: root   密码: admin
+            - 用户名: admin  密码: admin
+
+            ## 镜像使用指引
+
+            解压后打开RKDevTool.exe，选择'下载镜像'，点击'执行'即可
+
+            ```
+            RKDevTool/
+            ├── bin
+            │         ├── adb.exe
+            │         ├── AdbWinApi.dll
+            │         ├── AdbWinUsbApi.dll
+            │         ├── AFPTool.exe
+            │         └── RKImageMaker.exe
+            ├── config.cfg
+            ├── config.ini
+            ├── Language
+            │         ├── Chinese.ini
+            │         └── English.ini
+            ├── RKDevTool.exe
+            └── rockdev
+                └── image
+                    ├── boot.img
+                    ├── MiniLoaderAll.bin
+                    ├── modules.tar.gz
+                    ├── package-file
+                    ├── parameter.txt
+                    ├── rootfs.img
+                    └── uboot.img
+            ```
+
+            ## 免责声明
+
+            - **按原样提供**：镜像不作任何保证，使用风险自负
+            - **无官方关联**：与猫头鹰微视科技有限公司无官方关系
+            - **安全提示**：请及时更新补丁、修改默认密码、配置防火墙
