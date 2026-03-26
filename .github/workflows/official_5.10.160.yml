@@ -81,13 +81,13 @@ jobs:
 
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
+        timeout-minutes: 8
         with:
           tag: official_5.10.160_kernel
           artifacts: /builder/release/*
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
-          timeout-minutes: 8
           token: ${{ secrets.GITHUB_TOKEN }}
           body: | # official_5.10.160_kernel
 
@@ -412,13 +412,13 @@ jobs:
 
       - name: Upload Image to Release
         uses: ncipollo/release-action@main
+        timeout-minutes: 8
         with:
           tag: official_5.10.160_image
           artifacts: /builder/release/*
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
-          timeout-minutes: 8
           token: ${{ secrets.GITHUB_TOKEN }}
           body: | # official_5.10.160_image
 
