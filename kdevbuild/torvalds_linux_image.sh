@@ -233,7 +233,7 @@ ls -alh ${WORKDIR}/rockchip-tools.git
 
 mkdir -p ${WORKDIR}/release
 mkdir -p ${WORKDIR}/rockdev_img_tmp
-cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v2.84-AIOT3588A \
+cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v3.37-AIOT3588A \
   ${WORKDIR}/rockdev_img_tmp/RKDevTool
 mkdir -p ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 

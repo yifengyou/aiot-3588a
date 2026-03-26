@@ -31,7 +31,8 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &> /dev/null
+
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
 mkdir -p ${WORKDIR}/release
@@ -75,11 +76,10 @@ cd ${WORKDIR}
 mkdir -p rockchip-linux_develop-6.6
 cd rockchip-linux_develop-6.6
 
-wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/uboot.img
-wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/trust.img
-ls -alh uboot.img trust.img
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/uboot.img
+ls -alh uboot.img
 mv uboot.img ${WORKDIR}/rockdev/uboot.img
-mv trust.img ${WORKDIR}/rockdev/trust.img
+
 ls -alh ${WORKDIR}/rockdev/*.img
 md5sum ${WORKDIR}/rockdev/*.img
 sha256sum ${WORKDIR}/rockdev/*.img
@@ -234,12 +234,11 @@ ls -alh ${WORKDIR}/rockchip-tools.git
 
 mkdir -p ${WORKDIR}/release
 mkdir -p ${WORKDIR}/rockdev_img_tmp
-cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v2.84-AIOT3588A \
+cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v3.37-AIOT3588A \
   ${WORKDIR}/rockdev_img_tmp/RKDevTool
 mkdir -p ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 
 cp -a ${WORKDIR}/rockdev/uboot.img ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
-cp -a ${WORKDIR}/rockdev/trust.img ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 cp -a ${WORKDIR}/rockdev/boot.img ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 cp -a ${WORKDIR}/rockdev/rootfs.img ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 
