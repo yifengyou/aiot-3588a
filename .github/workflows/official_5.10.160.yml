@@ -1,4 +1,4 @@
-name: official kernel 5.10.66
+name: official kernel 5.10.160
 
 on:
   repository_dispatch:
@@ -70,8 +70,8 @@ jobs:
             -w /workspace \
             ubuntu:20.04 \
             bash -c "
-              chmod +x /workspace/kdevbuild/official_5.10.66_kernel.sh ;
-              /workspace/kdevbuild/official_5.10.66_kernel.sh
+              chmod +x /workspace/kdevbuild/official_5.10.160_kernel.sh ;
+              /workspace/kdevbuild/official_5.10.160_kernel.sh
             "
 
       - name: List build output
@@ -82,13 +82,13 @@ jobs:
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
         with:
-          tag: official_5.10.66_kernel
+          tag: official_5.10.160_kernel
           artifacts: /builder/release/*
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: | # official_5.10.66_kernel
+          body: | # official_5.10.160_kernel
 
             ## 发布内容
             - **Image** - Linux 内核镜像
@@ -400,8 +400,8 @@ jobs:
             -e set_rootfs=${{ matrix.set_rootfs }} \
             ubuntu:22.04 \
             bash -c "
-              chmod +x /workspace/kdevbuild/official_5.10.66_image.sh ;
-              /workspace/kdevbuild/official_5.10.66_image.sh
+              chmod +x /workspace/kdevbuild/official_5.10.160_image.sh ;
+              /workspace/kdevbuild/official_5.10.160_image.sh
             "
 
       - name: List build output
@@ -412,13 +412,13 @@ jobs:
       - name: Upload Image to Release
         uses: ncipollo/release-action@main
         with:
-          tag: official_5.10.66_image
+          tag: official_5.10.160_image
           artifacts: /builder/release/*
           allowUpdates: true
           removeArtifacts: false
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: | # official_5.10.66_image
+          body: | # official_5.10.160_image
 
             ## 系统密码
 

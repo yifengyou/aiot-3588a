@@ -62,7 +62,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_USER="builder" \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
-  rk3399-emb3531_defconfig
+  rk3588-aiot3588a_defconfig
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
@@ -89,16 +89,16 @@ make ARCH=arm64 \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
   dtbs \
-   -j$(nproc)
+  -j$(nproc)
 
-ls -alh arch/arm64/boot/dts/rockchip/rk3399-emb3531.dtb
+ls -alh arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
   KBUILD_BUILD_USER="builder" \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
-   -j$(nproc)
+  -j$(nproc)
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
@@ -115,16 +115,15 @@ make ARCH=arm64 \
   INSTALL_MOD_PATH=$(pwd)/kos \
   modules_install
 
-
 # release kernel image
 ls -alh arch/arm64/boot/Image
 md5sum arch/arm64/boot/Image
 cp -a arch/arm64/boot/Image ${WORKDIR}/release/
 
 # release dtb
-ls -alh ./arch/arm64/boot/dts/rockchip/rk3399-emb3531.dtb
-md5sum ./arch/arm64/boot/dts/rockchip/rk3399-emb3531.dtb
-cp -a ./arch/arm64/boot/dts/rockchip/rk3399-emb3531.dtb ${WORKDIR}/release/
+ls -alh ./arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb
+md5sum ./arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb
+cp -a ./arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb ${WORKDIR}/release/
 
 # release config
 cp .config ${WORKDIR}/release/config-7.0-kdev

@@ -4,7 +4,7 @@ set -euxo pipefail
 
 WORKDIR=$(pwd)
 export DEBIAN_FRONTEND=noninteractive
-export BUILD_TAG="EMB3531_develop-6.6_${set_rootfs}"
+export BUILD_TAG="AIOT3588A_develop-6.6_${set_rootfs}"
 
 #==========================================================================#
 #                        init build env                                    #
@@ -75,8 +75,8 @@ cd ${WORKDIR}
 mkdir -p rockchip-linux_develop-6.6
 cd rockchip-linux_develop-6.6
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/uboot_v2017/uboot.img
-wget -c https://github.com/yifengyou/EMB3531/releases/download/uboot_v2017/trust.img
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/uboot.img
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/trust.img
 ls -alh uboot.img trust.img
 mv uboot.img ${WORKDIR}/rockdev/uboot.img
 mv trust.img ${WORKDIR}/rockdev/trust.img
@@ -92,23 +92,23 @@ cd ${WORKDIR}
 mkdir -p rockchip-linux_develop-6.6
 cd rockchip-linux_develop-6.6
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/rockchip-linux_develop-6.6_kernel/Image
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/Image
 ls -alh Image
 md5sum Image
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/rockchip-linux_develop-6.6_kernel/config-6.6-kdev
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/config-6.6-kdev
 ls -alh config-6.6-kdev
 md5sum config-6.6-kdev
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/rockchip-linux_develop-6.6_kernel/System.map-6.6-kdev
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/System.map-6.6-kdev
 ls -alh System.map-6.6-kdev
 md5sum System.map-6.6-kdev
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/rockchip-linux_develop-6.6_kernel/rk3399-emb3531.dtb
-ls -alh rk3399-emb3531.dtb
-md5sum rk3399-emb3531.dtb
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/rk3588-aiot3588a.dtb
+ls -alh rk3588-aiot3588a.dtb
+md5sum rk3588-aiot3588a.dtb
 
-wget -c https://github.com/yifengyou/EMB3531/releases/download/rockchip-linux_develop-6.6_kernel/kos.tar.gz
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/rockchip-linux_develop-6.6_kernel/kos.tar.gz
 ls -alh kos.tar.gz
 md5sum kos.tar.gz
 tar -xf kos.tar.gz
@@ -148,7 +148,7 @@ mkfs.ext2 -U 7A3F0000-0000-446A-8000-702F00006273 -L kdevboot boot.img
 mount boot.img /mnt
 
 mkdir -p /mnt/dtb
-cp -a rk3399-emb3531.dtb /mnt/dtb/
+cp -a rk3588-aiot3588a.dtb /mnt/dtb/
 cp -f Image /mnt/vmlinuz-6.6-kdev
 cp -f config-6.6-kdev /mnt/config-6.6-kdev
 cp -f System.map-6.6-kdev /mnt/System.map-6.6-kdev
@@ -172,14 +172,14 @@ label l0
 	menu label Linux kernel 6.6-kdev
 	linux vmlinuz-6.6-kdev
 	initrd initrd.img-6.6-kdev
-	fdt /dtb/rk3399-emb3531.dtb
+	fdt /dtb/rk3588-aiot3588a.dtb
 	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M systemd.mask=systemd-growfs@-.service rockchip.dmc_freq=528000 video=HDMI-A-1:1920x1080@60
 
 label l0r
 	menu label Linux kernel 6.6-kdev (rescue target)
 	linux vmlinuz-6.6-kdev
 	initrd initrd.img-6.6-kdev
-	fdt /dtb/rk3399-emb3531.dtb
+	fdt /dtb/rk3588-aiot3588a.dtb
 	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M single
 
 EOF
@@ -234,7 +234,7 @@ ls -alh ${WORKDIR}/rockchip-tools.git
 
 mkdir -p ${WORKDIR}/release
 mkdir -p ${WORKDIR}/rockdev_img_tmp
-cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v2.84-EMB3531 \
+cp -a ${WORKDIR}/rockchip-tools.git/RKDevTool-v2.84-AIOT3588A \
   ${WORKDIR}/rockdev_img_tmp/RKDevTool
 mkdir -p ${WORKDIR}/rockdev_img_tmp/RKDevTool/rockdev/image/
 
