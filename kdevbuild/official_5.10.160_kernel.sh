@@ -47,9 +47,12 @@ mkdir -p ${WORKDIR}/release
 #==========================================================================#
 #                        build uboot                                       #
 #==========================================================================#
-cd ${WORKDIR}/
+cd ${WORKDIR}
 
 # skip uboot build, no official code found!
+cp -a official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/uboot.img ${WORKDIR}/rockdev/uboot.img
+ls -alh ${WORKDIR}/rockdev/uboot.img
+md5sum ${WORKDIR}/rockdev/uboot.img
 
 #==========================================================================#
 #                        build kernel                                      #
@@ -57,7 +60,12 @@ cd ${WORKDIR}/
 cd ${WORKDIR}
 
 # skip kernel build, no official code found!
+cp -a official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/boot.img ${WORKDIR}/rockdev/boot.img
+ls -alh ${WORKDIR}/rockdev/boot.img
+md5sum ${WORKDIR}/rockdev/boot.img
 
+
+cp -a ${WORKDIR}/rockdev/*.img ${WORKDIR}/release/
 ls -alh ${WORKDIR}/release/
 echo "Build completed successfully!"
 exit 0
