@@ -41,6 +41,14 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
     * [Ubuntu22](docs/系统/Ubuntu22/Ubuntu22.md)
     * [Ubuntu20](docs/系统/Ubuntu20/Ubuntu20.md)
 
+## 固件进展
+
+1. [基于官方Ubuntu2204修改（5.10.160内核）- 测试阶段](https://github.com/yifengyou/aiot-3588a/releases/tag/official_5.10.160_image)
+2. [rockchip-linux仓库（develop-6.6内核） - 适配中](https://github.com/yifengyou/aiot-3588a/releases/tag/rockchip-linux_develop-6.6_image)
+3. [rockchip-linux仓库（develop-6.1内核） - 适配中](https://github.com/yifengyou/aiot-3588a/releases/tag/rockchip-linux_develop-6.1_image)
+
+** 辛苦各位抽空测试验证固件，如有缺陷，提issue，谢谢 **
+
 ## 免责声明
 
 * 与官方无任何关联
