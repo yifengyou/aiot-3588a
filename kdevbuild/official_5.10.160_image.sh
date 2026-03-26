@@ -83,7 +83,7 @@ md5sum ${WORKDIR}/rockdev/uboot.img
 cd ${WORKDIR}
 
 
-cp -a official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/boot.img ${WORKDIR}/rockdev/uboot.img
+cp -a official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/boot.img ${WORKDIR}/rockdev/boot.img
 ls -alh ${WORKDIR}/rockdev/boot.img
 md5sum ${WORKDIR}/rockdev/boot.img
 
