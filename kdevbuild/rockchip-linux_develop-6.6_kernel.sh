@@ -30,7 +30,8 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &> /dev/null
+
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
 mkdir -p ${WORKDIR}/release
@@ -39,6 +40,8 @@ mkdir -p ${WORKDIR}/release
 #                        build uboot                                       #
 #==========================================================================#
 cd ${WORKDIR}/
+ls -alh
+
 git clone --depth 1 -b stable-5.10-rock5 https://github.com/radxa/u-boot.git u-boot.git
 cd u-boot.git
 ls -alh
@@ -61,7 +64,6 @@ make CROSS_COMPILE=${CROSS_COMPILE_ARM64} aiot3588a_defconfig
 mv uboot.img ${WORKDIR}/release/uboot.img
 ls -alh ${WORKDIR}/release/uboot.img
 md5sum ${WORKDIR}/release/uboot.img
-
 
 #==========================================================================#
 #                        build kernel                                      #
@@ -117,7 +119,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
   dtbs \
-   -j$(nproc)
+  -j$(nproc)
 
 ls -alh arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb
 
@@ -126,7 +128,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_USER="builder" \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
-   -j$(nproc)
+  -j$(nproc)
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
@@ -142,7 +144,6 @@ make ARCH=arm64 \
   LOCALVERSION=-kdev \
   INSTALL_MOD_PATH=$(pwd)/kos \
   modules_install
-
 
 # release kernel image
 ls -alh arch/arm64/boot/Image
