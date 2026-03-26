@@ -87,6 +87,19 @@ cp -a official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/boot.img ${WORKDI
 ls -alh ${WORKDIR}/rockdev/boot.img
 md5sum ${WORKDIR}/rockdev/boot.img
 
+# update rootfs with official oem firmware/kernel module
+if [ -d ${WORKDIR}/official_5.10.160 ]; then
+  find ${WORKDIR}/official_5.10.160
+  mount ${WORKDIR}/rockdev/rootfs.img /mnt
+
+  cp -a ${WORKDIR}/official_5.10.160/* /mnt/
+  ls -alh /mnt/
+
+  sync
+  umount /mnt
+  sync
+fi
+
 #==========================================================================#
 # Script Name: Generate Rockchip Updatable Image                           #
 # Description: This script is used to generate an updatable image package  #
