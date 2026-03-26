@@ -1,0 +1,16 @@
+# Aliases extracted from modules themselves.
+alias pci:v000014E4d*sv*sd*bc02sc80i* bcmdhd_pci
+alias sdio:c00v*d* bcmdhd
+alias sdio:c*v02D0d449A* bcmdhd
+alias sdio:c*v02D0d4499* bcmdhd
+alias sdio:c*v02D0d4498* bcmdhd
+alias sdio:c*v02D0dA805* bcmdhd
+alias sdio:c*v02D0d4497* bcmdhd
+alias sdio:c*v02D0d4496* bcmdhd
+alias sdio:c*v02D0d4495* bcmdhd
+alias sdio:c*v02D0dA806* bcmdhd
+alias sdio:c*v02D0dA804* bcmdhd
+alias sdio:c*v02D0dAAE8* bcmdhd
+alias sdio:c*v02D0dAAE7* bcmdhd
+alias sdio:c*v02D0d4362* bcmdhd
+alias sdio:c*v02D0d0000* bcmdhd
