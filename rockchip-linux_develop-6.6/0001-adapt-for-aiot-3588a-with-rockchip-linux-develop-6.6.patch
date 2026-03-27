@@ -1,4 +1,4 @@
-From 5f5e8acea3c4777dfcf31edb6734c9c7481dcb0c Mon Sep 17 00:00:00 2001
+From 76d74f0b5829df1329ed3c8e8022dcf37274d238 Mon Sep 17 00:00:00 2001
 From: yifengyou <842056007@qq.com>
 Date: Thu, 26 Mar 2026 10:19:55 +0000
 Subject: [PATCH] adapt for aiot-3588a with rockchip-linux develop-6.6
@@ -19,10 +19,10 @@ index d46bc96f93a5..26f7b9ade09a 100644
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-evb1-lp4-v10-edp-8lanes-TPM270WR1.dtb
 diff --git a/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts b/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts
 new file mode 100644
-index 000000000000..f3091de882e6
+index 000000000000..5389c536efa9
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts
-@@ -0,0 +1,2457 @@
+@@ -0,0 +1,2459 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
@@ -597,13 +597,9 @@ index 000000000000..f3091de882e6
 +
 +	gpio_leds: gpio-leds {
 +		compatible = "gpio-leds";
-+		led_work_heartbeat: work_heartbeat {
++		work_led: work_led { // 红色LED灯里，有蓝色LED
 +			linux,default-trigger = "heartbeat";
 +			gpios = <&gpio4 RK_PA5 GPIO_ACTIVE_HIGH>;
-+		};
-+		red_led: red_led {
-+			linux,default-trigger = "none";
-+			gpios = <&nca9555 4 GPIO_ACTIVE_HIGH>;
 +		};
 +	};
 +
@@ -1823,23 +1819,6 @@ index 000000000000..f3091de882e6
 +	};
 +};
 +
-+&i2c6 {
-+	status = "okay";
-+
-+	hym8563: hym8563@51 {
-+		compatible = "haoyu,hym8563";
-+		reg = <0x51>;
-+		#clock-cells = <0>;
-+		clock-frequency = <32768>;
-+		clock-output-names = "hym8563";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&hym8563_int>;
-+		interrupt-parent = <&gpio0>;
-+		interrupts = <RK_PB0 IRQ_TYPE_LEVEL_LOW>;
-+		wakeup-source;
-+	};
-+};
-+
 +&i2c7 {
 +	status = "okay";
 +	es8388: es8388@11 {
@@ -2060,7 +2039,9 @@ index 000000000000..f3091de882e6
 +	status = "okay";
 +};
 +
++// mmc2 = "/mmc@fe2d0000";
 +&sdio {
++	compatible = "rockchip,rk3588-dw-mshc", "rockchip,rk3288-dw-mshc";
 +	max-frequency = <150000000>;
 +	no-sd;
 +	no-mmc;
@@ -2180,12 +2161,12 @@ index 000000000000..f3091de882e6
 +	gpios = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
 +};
 +
-+&hym8563 {
-+	/delete-property/ pinctrl-names;
-+	/delete-property/ pinctrl-0;
-+	/delete-property/ interrupt-parent;
-+	/delete-property/ interrupts;
-+};
++//&hym8563 {
++//	/delete-property/ pinctrl-names;
++//	/delete-property/ pinctrl-0;
++//	/delete-property/ interrupt-parent;
++//	/delete-property/ interrupts;
++//};
 +
 +&gmac1 {
 +	status = "okay";
@@ -2195,6 +2176,7 @@ index 000000000000..f3091de882e6
 +	clock_in_out = "output";
 +
 +	snps,reset-gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
++
 +	snps,reset-active-low;
 +	/* Reset time is 20ms, 100ms for rtl8211f */
 +	snps,reset-delays-us = <0 20000 100000>;
@@ -2212,23 +2194,43 @@ index 000000000000..f3091de882e6
 +	phy-handle = <&rgmii_phy>;
 +};
 +
++// i2c6 = "/i2c@fec80000";
 +&i2c6 {
 +	status = "okay";
 +
-+	nca9555: nca9555@20  {
-+		reg = <0x20>;
-+		compatible = "nxp,pca9555";
-+		status = "okay";
-+		gpio-controller;
-+		vcc-supply = <&vcc_3v3_s0>;
-+		#gpio-cells = <2>;
-+	};
++	/delete-property/ resets;
++	/delete-property/ reset-names;
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2c6m0_xfer>;
 +
 +	mcuinf: mcuinf@62 {
 +		compatible = "smdtmcu,STM8S00K3";
 +		status = "okay";
 +		reg = <0x62>;
 +		#pwm-cells = <2>;
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>; // 0x8000，与官方dtb逆向保持一致
++		clock-output-names = "hym8563";
++		//pinctrl-names = "default";
++		//pinctrl-0 = <&hym8563_int>;
++		//interrupt-parent = <&gpio0>;
++		//interrupts = <RK_PB0 IRQ_TYPE_LEVEL_LOW>;
++		wakeup-source;
++		vcc-supply = <&vcc_3v3_s0>; // 必须给供电，否则报错
++	};
++
++	pca9555: pca9555@20  {
++		reg = <0x20>;
++		compatible = "nxp,pca9555";
++		status = "okay";
++		gpio-controller;
++		vcc-supply = <&vcc_3v3_s0>;  // 必须给供电，否则报错
++		#gpio-cells = <2>;
 +	};
 +
 +	usbc0: fusb302@22 {
