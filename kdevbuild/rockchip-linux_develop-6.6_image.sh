@@ -154,6 +154,11 @@ cp -f config-6.6-kdev /mnt/config-6.6-kdev
 cp -f System.map-6.6-kdev /mnt/System.map-6.6-kdev
 touch /mnt/initrd.img-6.6-kdev
 
+# add official kernel
+cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/out/rk-kernel.dtb /mnt/dtb/
+cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/kernel /mnt/
+
+
 cat >/mnt/extlinux.conf <<EOF
 ## /extlinux/extlinux.conf
 ##
@@ -181,6 +186,15 @@ label l0r
 	initrd initrd.img-6.6-kdev
 	fdt /dtb/rk3588-aiot3588a.dtb
 	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M single
+
+label l1
+	menu label rk-kernel.dtb
+	linux kernel
+	initrd initrd.img-6.6-kdev
+	fdt /dtb/rk-kernel.dtb
+	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M
+
+
 
 EOF
 
