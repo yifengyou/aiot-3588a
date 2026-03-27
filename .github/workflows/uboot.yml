@@ -71,6 +71,7 @@ jobs:
 
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
+        timeout-minutes: 8
         with:
           tag: uboot_v2017
           artifacts: /builder/release/*

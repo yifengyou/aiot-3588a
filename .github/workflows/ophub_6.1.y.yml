@@ -81,6 +81,7 @@ jobs:
 
       - name: Upload Kernel to Release
         uses: ncipollo/release-action@main
+        timeout-minutes: 8
         with:
           tag: ophub_6.1.y_kernel
           artifacts: /builder/release/*
@@ -411,6 +412,7 @@ jobs:
 
       - name: Upload Image to Release
         uses: ncipollo/release-action@main
+        timeout-minutes: 8
         with:
           tag: ophub_6.1.y_image
           artifacts: /builder/release/*

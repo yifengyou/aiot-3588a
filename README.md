@@ -47,7 +47,9 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 2. [rockchip-linux仓库（develop-6.6内核） - 适配中](https://github.com/yifengyou/aiot-3588a/releases/tag/rockchip-linux_develop-6.6_image)
 3. [rockchip-linux仓库（develop-6.1内核） - 适配中](https://github.com/yifengyou/aiot-3588a/releases/tag/rockchip-linux_develop-6.1_image)
 
-** 辛苦各位抽空测试验证固件，如有缺陷，提issue，谢谢 **
+```text
+辛苦各位抽空测试验证固件，如有缺陷，提issue，谢谢 
+```
 
 ## 免责声明
 
