@@ -73,7 +73,9 @@ if [ -d ${WORKDIR}/official_5.10.160 ]; then
   find ${WORKDIR}/official_5.10.160
   mount ${WORKDIR}/rockdev/rootfs.img /mnt
 
-  cp -a ${WORKDIR}/official_5.10.160/* /mnt/
+  cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/lib/modules/
+  cp -a ${WORKDIR}/official_5.10.160/vendor /mnt/
+
   ls -alh /mnt/
 
   sync
