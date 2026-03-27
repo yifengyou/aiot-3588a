@@ -92,7 +92,13 @@ if [ -d ${WORKDIR}/official_5.10.160 ]; then
   find ${WORKDIR}/official_5.10.160
   mount ${WORKDIR}/rockdev/rootfs.img /mnt
 
-  cp -a ${WORKDIR}/official_5.10.160/* /mnt/
+  if [ -d /mnt/lib/modules/ ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/lib/modules/
+  elif [ -d /mnt/usr/lib/modules ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/usr/lib/modules/
+  fi
+  cp -a ${WORKDIR}/official_5.10.160/vendor /mnt/
+
   ls -alh /mnt/
 
   sync

@@ -31,7 +31,7 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &> /dev/null
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &>/dev/null
 
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
@@ -73,7 +73,11 @@ if [ -d ${WORKDIR}/official_5.10.160 ]; then
   find ${WORKDIR}/official_5.10.160
   mount ${WORKDIR}/rockdev/rootfs.img /mnt
 
-  cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/lib/modules/
+  if [ -d /mnt/lib/modules/ ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/lib/modules/
+  elif [ -d /mnt/usr/lib/modules ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/usr/lib/modules/
+  fi
   cp -a ${WORKDIR}/official_5.10.160/vendor /mnt/
 
   ls -alh /mnt/
@@ -172,7 +176,6 @@ touch /mnt/initrd.img-6.6-kdev
 # add official kernel
 cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/out/rk-kernel.dtb /mnt/dtb/
 cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/kernel /mnt/
-
 
 cat >/mnt/extlinux.conf <<EOF
 ## /extlinux/extlinux.conf
