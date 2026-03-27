@@ -1,4 +1,4 @@
-From 76d74f0b5829df1329ed3c8e8022dcf37274d238 Mon Sep 17 00:00:00 2001
+From 1bf879c54fc54b71425c077ef7138ba5f39ed64a Mon Sep 17 00:00:00 2001
 From: yifengyou <842056007@qq.com>
 Date: Thu, 26 Mar 2026 10:19:55 +0000
 Subject: [PATCH] adapt for aiot-3588a with rockchip-linux develop-6.6
@@ -19,10 +19,10 @@ index d46bc96f93a5..26f7b9ade09a 100644
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-evb1-lp4-v10-edp-8lanes-TPM270WR1.dtb
 diff --git a/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts b/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts
 new file mode 100644
-index 000000000000..5389c536efa9
+index 000000000000..e066d968700a
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dts
-@@ -0,0 +1,2459 @@
+@@ -0,0 +1,2445 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
@@ -488,7 +488,7 @@ index 000000000000..5389c536efa9
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&wifi_host_wake_irq>;
 +		WIFI,host_wake-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_HIGH>;
-+		WIFI,poweren-gpios = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;
++		// WIFI,poweren-gpios = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;
 +		status = "okay";
 +	};
 +
@@ -1153,17 +1153,7 @@ index 000000000000..5389c536efa9
 +	rockchip,primary-plane = <ROCKCHIP_VOP2_ESMART3>;
 +};
 +
-+
-+
-+
-+
-+
-+
-+
-+
-+
-+
-+
++// spi@feb20000
 +&spi2 {
 +	status = "okay";
 +	assigned-clocks = <&cru CLK_SPI2>;
@@ -2446,10 +2436,6 @@ index 000000000000..5389c536efa9
 +    status = "disabled";
 +};
 +
-+/** not pcie
-+ **
-+ **/
-+
 +&pcie2x1l0 {
 +	status = "disabled";
 +};
@@ -2482,7 +2468,6 @@ index 000000000000..5389c536efa9
 +&usbhost_dwc3_0 {
 +	status = "okay";
 +};
-\ No newline at end of file
 diff --git a/arch/arm64/configs/rk3588-aiot3588a_defconfig b/arch/arm64/configs/rk3588-aiot3588a_defconfig
 new file mode 100644
 index 000000000000..54c808e33404
