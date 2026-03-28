@@ -30,16 +30,46 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &> /dev/null
+
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
 mkdir -p ${WORKDIR}/release
 
 #==========================================================================#
+#                        build uboot                                       #
+#==========================================================================#
+cd ${WORKDIR}/
+ls -alh
+
+git clone --depth 1 -b stable-5.10-rock5 https://github.com/radxa/u-boot.git u-boot.git
+cd u-boot.git
+ls -alh
+
+# apply patch
+if ls ${WORKDIR}/radxa-uboot/*.patch >/dev/null 2>&1; then
+  git config --global user.name yifengyou
+  git config --global user.email 842056007@qq.com
+  git am ${WORKDIR}/radxa-uboot/*.patch
+fi
+
+tool=$(which aarch64-linux-gnu-gcc)
+export CROSS_COMPILE_ARM64="${tool%gcc}"
+echo "using gcc: [${CROSS_COMPILE_ARM64}]"
+
+rm -rf spl/u-boot-spl*
+make CROSS_COMPILE=${CROSS_COMPILE_ARM64} aiot3588a_defconfig
+./make.sh rk3588
+
+mv uboot.img ${WORKDIR}/release/uboot.img
+ls -alh ${WORKDIR}/release/uboot.img
+md5sum ${WORKDIR}/release/uboot.img
+
+#==========================================================================#
 #                        build kernel                                      #
 #==========================================================================#
 cd ${WORKDIR}
-git clone -b develop-6.1 https://github.com/rockchip-linux/kernel rockchip-linux_kernel.git
+git clone --depth 1 -b develop-6.1 https://github.com/rockchip-linux/kernel rockchip-linux_kernel.git
 cd rockchip-linux_kernel.git
 ls -alh
 
@@ -71,7 +101,6 @@ make ARCH=arm64 \
   LOCALVERSION=-kdev \
   olddefconfig
 
-
 # show config
 cat .config
 
@@ -90,7 +119,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
   dtbs \
-   -j$(nproc)
+  -j$(nproc)
 
 ls -alh arch/arm64/boot/dts/rockchip/rk3588-aiot3588a.dtb
 
@@ -99,7 +128,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_USER="builder" \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
-   -j$(nproc)
+  -j$(nproc)
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
@@ -115,7 +144,6 @@ make ARCH=arm64 \
   LOCALVERSION=-kdev \
   INSTALL_MOD_PATH=$(pwd)/kos \
   modules_install
-
 
 # release kernel image
 ls -alh arch/arm64/boot/Image
