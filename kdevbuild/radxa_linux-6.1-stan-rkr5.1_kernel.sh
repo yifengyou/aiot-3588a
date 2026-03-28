@@ -30,7 +30,8 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &> /dev/null
+
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
 mkdir -p ${WORKDIR}/release
@@ -55,11 +56,10 @@ export CROSS_COMPILE_ARM64="${tool%gcc}"
 echo "using gcc: [${CROSS_COMPILE_ARM64}]"
 
 rm -rf spl/u-boot-spl*
-make CROSS_COMPILE=${CROSS_COMPILE_ARM64} rockchip-rk3399_defconfig
-make CROSS_COMPILE=${CROSS_COMPILE_ARM64} -j$(nproc)
-./make.sh rk3399
-mv uboot.img ${WORKDIR}/release/uboot.img
+make CROSS_COMPILE=${CROSS_COMPILE_ARM64} aiot3588a_defconfig
+./make.sh rk3588
 
+mv uboot.img ${WORKDIR}/release/uboot.img
 ls -alh ${WORKDIR}/release/uboot.img
 md5sum ${WORKDIR}/release/uboot.img
 
@@ -91,7 +91,7 @@ make ARCH=arm64 \
   KBUILD_BUILD_USER="builder" \
   KBUILD_BUILD_HOST="kdevbuilder" \
   LOCALVERSION=-kdev \
-  aiot3588a_rk3588_defconfig
+  rk3588-aiot3588a_defconfig
 
 make ARCH=arm64 \
   CROSS_COMPILE=aarch64-linux-gnu- \
