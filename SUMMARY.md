@@ -21,5 +21,5 @@
     * [Android12](docs/系统/Android12/Android12.md)
     * [Ubuntu22](docs/系统/Ubuntu22/Ubuntu22.md)
     * [Ubuntu20](docs/系统/Ubuntu20/Ubuntu20.md)
-
+    * [armbian debian13](docs/系统/armbian_debian13/armbian_debian13.md)
 
