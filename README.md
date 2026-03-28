@@ -12,11 +12,15 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 
 ![](./images/1016993420400.png)
 
+
+
 ## 相关站点
 
 * [视美泰主官网](https://www.shimeta.com.cn)
 * [视美泰开源技术资料社区](http://forum.shimetapi.cn/wiki/OpenSource_OH/)
 * [视美泰OpenHarmony入门指引(密码123456)](https://www.showdoc.com.cn/openharmony/0)
+
+
 
 ## 目录
 
@@ -42,6 +46,8 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
     * [Ubuntu20](docs/系统/Ubuntu20/Ubuntu20.md)
     * [armbian debian13](docs/系统/armbian_debian13/armbian_debian13.md)
 
+
+
 ## 固件进展
 
 1. [基于官方Ubuntu2204修改（5.10.160官方内核）- 测试阶段](https://github.com/yifengyou/aiot-3588a/releases/tag/official_5.10.160_image)
@@ -57,10 +63,14 @@ Bug report, questions and discussion are welcome, you can post an issue or pull 
 辛苦各位抽空测试验证固件，如有缺陷，提issue，谢谢 
 ```
 
+
+
 ## 免责声明
 
 * 与官方无任何关联
 * 仅学习交流，无任何商业用途
+
+
 
 ## 效果图
 

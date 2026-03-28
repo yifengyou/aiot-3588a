@@ -31,7 +31,8 @@ apt-get install -qq -y --no-install-recommends \
   python-is-python3 qemu-user-static rar rdfind rename rsync sed \
   squashfs-tools swig tar tree u-boot-tools udev unzip util-linux uuid \
   uuid-dev uuid-runtime vim wget whiptail xfsprogs xsltproc xxd xz-utils \
-  zip zlib1g-dev zstd binwalk ripgrep sudo
+  zip zlib1g-dev zstd binwalk ripgrep sudo libgnutls28-dev python3-pyelftools &>/dev/null
+
 localedef -i zh_CN -f UTF-8 zh_CN.UTF-8 || true
 mkdir -p ${WORKDIR}/rockdev
 mkdir -p ${WORKDIR}/release
@@ -67,21 +68,39 @@ fi
 
 ls -alh ${WORKDIR}/rockdev/rootfs.img
 
+# update rootfs with official oem firmware/kernel module
+if [ -d ${WORKDIR}/official_5.10.160 ]; then
+  find ${WORKDIR}/official_5.10.160
+  mount ${WORKDIR}/rockdev/rootfs.img /mnt
+
+  if [ -d /mnt/lib/modules/ ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/lib/modules/
+  elif [ -d /mnt/usr/lib/modules ]; then
+    cp -a ${WORKDIR}/official_5.10.160/lib/modules/* /mnt/usr/lib/modules/
+  fi
+  cp -a ${WORKDIR}/official_5.10.160/vendor /mnt/
+
+  ls -alh /mnt/
+
+  sync
+  umount /mnt
+  sync
+fi
 #==========================================================================#
 #                        build uboot                                       #
 #==========================================================================#
 cd ${WORKDIR}
 
-mkdir -p friendlyarm_nanopi6-v6.1.y
-cd friendlyarm_nanopi6-v6.1.y
+mkdir -p friendlyarm_nanopi6-v6.1.y_kernel
+cd friendlyarm_nanopi6-v6.1.y_kernel
 
-wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/uboot.img
-wget -c https://github.com/yifengyou/aiot-3588a/releases/download/uboot_v2017/trust.img
-ls -alh uboot.img trust.img
+wget -c https://github.com/yifengyou/aiot-3588a/releases/download/friendlyarm_nanopi6-v6.1.y_kernel/uboot.img
+ls -alh uboot.img
 mv uboot.img ${WORKDIR}/rockdev/uboot.img
-mv trust.img ${WORKDIR}/rockdev/trust.img
+
 ls -alh ${WORKDIR}/rockdev/*.img
 md5sum ${WORKDIR}/rockdev/*.img
+sha256sum ${WORKDIR}/rockdev/*.img
 
 #==========================================================================#
 #                        build kernel                                      #
@@ -153,6 +172,11 @@ cp -f config-6.1-kdev /mnt/config-6.1-kdev
 cp -f System.map-6.1-kdev /mnt/System.map-6.1-kdev
 touch /mnt/initrd.img-6.1-kdev
 
+# add official kernel
+cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/out/rk-kernel.dtb /mnt/dtb/
+cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/kernel /mnt/
+
+
 cat >/mnt/extlinux.conf <<EOF
 ## /extlinux/extlinux.conf
 ##
@@ -180,6 +204,14 @@ label l0r
 	initrd initrd.img-6.1-kdev
 	fdt /dtb/rk3588-aiot3588a.dtb
 	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,1500000 console=tty1 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M single
+
+label l1
+	menu label official-5.10.160
+	linux kernel
+	initrd initrd.img-6.1-kdev
+	fdt /dtb/rk-kernel.dtb
+	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M
+
 
 EOF
 

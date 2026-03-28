@@ -168,10 +168,10 @@ mount boot.img /mnt
 
 mkdir -p /mnt/dtb
 cp -a rk3588-aiot3588a.dtb /mnt/dtb/
-cp -f Image /mnt/vmlinuz-6.6-kdev
-cp -f config-6.6-kdev /mnt/config-6.6-kdev
-cp -f System.map-6.6-kdev /mnt/System.map-6.6-kdev
-touch /mnt/initrd.img-6.6-kdev
+cp -f Image /mnt/vmlinuz-6.1-kdev
+cp -f config-6.1-kdev /mnt/config-6.1-kdev
+cp -f System.map-6.1-kdev /mnt/System.map-6.1-kdev
+touch /mnt/initrd.img-6.1-kdev
 
 # add official kernel
 cp ${WORKDIR}/official-firmware/smdt_3588A_ubuntu22.04_20240724_113648/unpack-boot/out/rk-kernel.dtb /mnt/dtb/
@@ -208,7 +208,7 @@ label l0r
 label l1
 	menu label official-5.10.160
 	linux kernel
-	initrd initrd.img-6.6-kdev
+	initrd initrd.img-6.1-kdev
 	fdt /dtb/rk-kernel.dtb
 	append root=PARTUUID=614e0000-0000-4b53-8000-1d28000054a9 rootwait rw console=ttyS2,115200 cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory net.ifnames=0 biosdevname=0 level=10 loglevel=10 selinux=0 crashkernel=384M-:128M
 
