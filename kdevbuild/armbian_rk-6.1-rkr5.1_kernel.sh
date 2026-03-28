@@ -75,15 +75,15 @@ cd linux-rockchip.git
 ls -alh
 
 # apply patch
-if ls "${WORKDIR}/rockchip-linux_develop-6.6/"*.patch >/dev/null 2>&1; then
+if ls "${WORKDIR}/armbian_rk-6.1-rkr5.1/"*.patch >/dev/null 2>&1; then
   git config --global user.name yifengyou
   git config --global user.email 842056007@qq.com
-  git am ${WORKDIR}/rockchip-linux_develop-6.6/*.patch
+  git am ${WORKDIR}/armbian_rk-6.1-rkr5.1/*.patch
 fi
 
-if [ -d ${WORKDIR}/rockchip-linux_develop-6.6 ]; then
-  ls -alh ${WORKDIR}/rockchip-linux_develop-6.6/
-  cp -a ${WORKDIR}/rockchip-linux_develop-6.6/* .
+if [ -d ${WORKDIR}/armbian_rk-6.1-rkr5.1 ]; then
+  ls -alh ${WORKDIR}/armbian_rk-6.1-rkr5.1/
+  cp -a ${WORKDIR}/armbian_rk-6.1-rkr5.1/* .
   ls -alh
 fi
 
